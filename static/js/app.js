@@ -1,41 +1,31 @@
 
 var idSelect = d3.select("#selDataset");
-
 var demographicsTable = d3.select("#sample-metadata");
-
-
 var barChart = d3.select("#bar");
-
-
 var bubbleChart = d3.select("bubble");
-
-
 var gaugeChart = d3.select("gauge");
 
 // create a function 
 function init() {
 
-    // reset any previous data
-    resetData();
+// reset any previous data
+    resetData();  
+ d3.json("data/samples.json").then((data => {
 
-    
-    d3.json("data/samples.json").then((data => {
-
-        
-        // DROPDOWN MENU WITH IDs 
+    // DROPDOWN MENU WITH IDs 
     
 
-        //  use a forEach to loop
-        data.names.forEach((name => {
-            var option = idSelect.append("option");
+ //  use a forEach to loop
+    data.names.forEach((name => {
+    var option = idSelect.append("option");
             option.text(name);
         })); 
 
-        // To get the first ID 
-        var initId = idSelect.property("value")
+ // To get the first ID 
+    var initId = idSelect.property("value")
 
-        // plot charts with initial ID
-        plotCharts(initId);
+// plot charts with initial ID
+    plotCharts(initId);
 
     })); 
 
@@ -43,9 +33,8 @@ function init() {
 
 // create a function to reset divs 
 function resetData() {
-
     
-    // CLEAR THE DATA
+// CLEAR THE DATA
     demographicsTable.html("");
     barChart.html("");
     bubbleChart.html("");
@@ -54,49 +43,36 @@ function resetData() {
 }; 
 
 //  Read JSON and plot charts
-function plotCharts(id) {
-
-    
+    function plotCharts(id) {
     d3.json("data/samples.json").then((data => {
 
         
-        // DEMOGRAPHICS TABLE
+ // DEMOGRAPHICS TABLE
     
+// filter the metadata for the ID chosen
+    var individualMetadata = data.metadata.filter(participant => participant.id == id)[0];
 
-        // filter the metadata for the ID chosen
-        var individualMetadata = data.metadata.filter(participant => participant.id == id)[0];
-
-        //  wash frequency for gauge chart 
-        var wfreq = individualMetadata.wfreq;
-
-        
-        Object.entries(individualMetadata).forEach(([key, value]) => {
-
-            var newList = demographicsTable.append("ul");
-            newList.attr("class", "list-group list-group-flush");
-
-            
-            var listItem = newList.append("li");
-
-            
-            listItem.attr("class", "list-group-item p-1 demo-text bg-transparent");
-
-            
-            listItem.text(`${key}: ${value}`);
+//  wash frequency for gauge chart 
+    var wfreq = individualMetadata.wfreq;
+     Object.entries(individualMetadata).forEach(([key, value]) => {
+     var newList = demographicsTable.append("ul");
+     newList.attr("class", "list-group list-group-flush");
+     var listItem = newList.append("li");
+     listItem.attr("class", "list-group-item p-1 demo-text bg-transparent");
+    listItem.text(`${key}: ${value}`);
 
         }); 
 
-        
-        //     PLOTTING CHARTS 
+ //     PLOTTING CHARTS 
         var individualSample = data.samples.filter(sample => sample.id == id)[0];
 
-        // To store sample data
-        var otuIds = [];
-        var otuLabels = [];
-        var sampleValues = [];
+// To store sample data
+    var otuIds = [];
+    var otuLabels = [];
+    var sampleValues = [];
 
-        // Iterate 
-        Object.entries(individualSample).forEach(([key, value]) => {
+ // Iterate 
+    Object.entries(individualSample).forEach(([key, value]) => {
 
             switch (key) {
                 case "otu_ids":
@@ -116,18 +92,18 @@ function plotCharts(id) {
         }); // close forEach
 
         
-        var topOtuIds = otuIds[0].slice(0, 10).reverse();
-        var topOtuLabels = otuLabels[0].slice(0, 10).reverse();
-        var topSampleValues = sampleValues[0].slice(0, 10).reverse();
+    var topOtuIds = otuIds[0].slice(0, 10).reverse();
+    var topOtuLabels = otuLabels[0].slice(0, 10).reverse();
+    var topSampleValues = sampleValues[0].slice(0, 10).reverse();
 
-        // map function to store the IDs 
+// map function to store the IDs 
         var topOtuIdsFormatted = topOtuIds.map(otuID => "OTU " + otuID);
 
         
-        // PLOT BAR CHART
+// PLOT BAR CHART
         
 
-        // create a trace
+// create a trace
         var traceBar = {
             x: topSampleValues,
             y: topOtuIdsFormatted,
@@ -139,10 +115,10 @@ function plotCharts(id) {
             }
         };
 
-        // array for plotting
+ // array for plotting
         var dataBar = [traceBar];
 
-        // plot layout
+// plot layout
         var layoutBar = {
             height: 500,
             width: 600,
@@ -171,14 +147,14 @@ function plotCharts(id) {
         }
 
 
-        // bar chart to the "bar" div
+ // bar chart to the "bar" div
         Plotly.newPlot("bar", dataBar, layoutBar);
 
         
-        // PLOT BUBBLE CHART
+// PLOT BUBBLE CHART
     
 
-        // create trace
+ // create trace
         var traceBub = {
             x: otuIds[0],
             y: sampleValues[0],
@@ -191,10 +167,10 @@ function plotCharts(id) {
             }
         };
 
-        // array for the plot
+ // array for the plot
         var dataBub = [traceBub];
 
-        // plot layout
+// plot layout
         var layoutBub = {
             font: {
                 family: 'Quicksand'
@@ -215,19 +191,19 @@ function plotCharts(id) {
             showlegend: false,
         };
 
-        // plot the bubble chart 
+// plot the bubble chart 
         Plotly.newPlot('bubble', dataBub, layoutBub);
 
         
-        // PLOT GAUGE CHART (OPTIONAL)
+// PLOT GAUGE CHART (OPTIONAL)
         
 
-        // if wfreq has a null value, make it zero for calculating pointer later
+// if wfreq has a null value, make it zero for calculating pointer later
         if (wfreq == null) {
             wfreq = 0;
         }
 
-        // Indicator trace for the gauge chart
+ // Indicator trace for the gauge chart
         var traceGauge = {
             domain: { x: [0, 1], y: [0, 1] },
             value: wfreq,
@@ -242,7 +218,7 @@ function plotCharts(id) {
                     }
                 },
                 bar: { color: 'rgba(8,29,88,0)' }, 
-                // To make  gauge bar transparent 
+// To make  gauge bar transparent 
                 steps: [
                     { range: [0, 1], color: 'rgb(255,255,217)' },
                     { range: [1, 2], color: 'rgb(237,248,217)' },
@@ -257,17 +233,17 @@ function plotCharts(id) {
             }
         };
 
-        // angle for each wfreq segment on the chart
+// angle for each wfreq segment on the chart
         var angle = (wfreq / 9) * 180;
 
-        //  end points for triangle pointer path
+//  end points for triangle pointer path
         var degrees = 180 - angle,
             radius = .8;
         var radians = degrees * Math.PI / 180;
         var x = radius * Math.cos(radians);
         var y = radius * Math.sin(radians);
 
-        // create needle shape (triangle). 
+// create needle shape (triangle). 
         
         var mainPath = 'M -.0 -0.025 L .0 0.025 L ',
             cX = String(x),
@@ -277,7 +253,7 @@ function plotCharts(id) {
 
         gaugeColors = ['rgb(8,29,88)', 'rgb(37,52,148)', 'rgb(34,94,168)', 'rgb(29,145,192)', 'rgb(65,182,196)', 'rgb(127,205,187)', 'rgb(199,233,180)', 'rgb(237,248,217)', 'rgb(255,255,217)', 'white']
 
-        // create a trace for the circle 
+// create a trace for the circle 
         var traceNeedleCenter = {
             type: 'scatter',
             showlegend: false,
@@ -288,13 +264,13 @@ function plotCharts(id) {
             hoverinfo: 'name'
         };
 
-        //  Data array from the two traces
+//  Data array from the two traces
         var dataGauge = [traceGauge, traceNeedleCenter];
 
-        // layout for the chart
+ // layout for the chart
         var layoutGauge = {
 
-            // Needle pointer shape 
+// Needle pointer shape 
             shapes: [{
                 type: 'path',
                 path: path,
@@ -337,7 +313,7 @@ function plotCharts(id) {
             }
         };
 
-        // plot the gauge chart
+// plot the gauge chart
         Plotly.newPlot('gauge', dataGauge, layoutGauge);
 
 
@@ -348,10 +324,10 @@ function plotCharts(id) {
 // If there is a change in the dropdown select menu
 function optionChanged(id) {
 
-    // reset the data
+// reset the data
     resetData();
 
-    // plot the charts 
+// plot the charts 
     plotCharts(id);
 
 
